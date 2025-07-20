@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: greetli_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - qdrant
+    restart: always
+
+  db:
+    image: postgres:16
+    container_name: greetli_db
+    environment:
+      - POSTGRES_USER=greetli_ai
+      - POSTGRES_PASSWORD=greetli_ai
+      - POSTGRES_DB=greetli_ai_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: always
+
+volumes:
+  postgres_data:
+  qdrant_data:

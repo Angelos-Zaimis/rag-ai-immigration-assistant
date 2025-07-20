@@ -1,0 +1,20 @@
+from langchain_community.embeddings import OpenAIEmbeddings
+from qdrant_client import QdrantClient
+from langchain_community.vectorstores import Qdrant
+
+class QdrantSearchService:
+    # Initializes the Qdrant client, OpenAI embeddings, and vector store
+    def __init__(self, collection_name: str = "immigration_docs"):
+        self.collection_name = collection_name
+        self.client = QdrantClient(host="localhost", port=6333)
+        self.embeddings = OpenAIEmbeddings()
+        self.vector_store = Qdrant(
+            client=self.client,
+            collection_name=self.collection_name,
+            embeddings=self.embeddings,
+        )
+
+    # Searches for the top-k most similar document chunks based on the input query
+    def search_similarity(self, query: str, k: int = 3):
+        results = self.vector_store.similarity_search(query=query, k=k)
+        return [doc.page_content for doc in results]
