@@ -16,5 +16,11 @@ class QdrantSearchService:
 
     # Searches for the top-k most similar document chunks based on the input query
     def search_similarity(self, query: str, k: int = 3):
-        results = self.vector_store.similarity_search(query=query, k=k)
-        return [doc.page_content for doc in results]
+        try:
+            results = self.vector_store.similarity_search(query=query, k=k)
+            if not results:
+                return []
+            return [doc.page_content for doc in results]
+        except Exception as e:
+            print(f"Similarity search failed: {e}")
+            return []

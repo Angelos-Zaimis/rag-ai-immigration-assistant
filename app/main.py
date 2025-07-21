@@ -1,22 +1,36 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import user_routes, chat_routes
+from app.routes import user_routes, chat_routes, documents_routes, auth_routes
 
 # Initialize FastAPI with metadata for Swagger UI
 app = FastAPI(
     title="Greetli AI Backend",
     description="""
-    Greetli AI Backend API with OCR, Langchain, and Google Translate capabilities.
+    Greetli AI Backend API with OCR, Langchain, Google Translate, and JWT Authentication capabilities.
     
     ## Features
+    * 🔐 JWT Authentication (Register, Login, Refresh)
     * 👤 User Management
     * 📝 OCR Processing
     * 🤖 AI Integration
     * 🌐 Translation Services
     
     ## Authentication
-    Authentication will be implemented in future versions.
+    
+    This API uses JWT (JSON Web Tokens) for authentication:
+    
+    1. **Register** or **Login** to get access and refresh tokens
+    2. **Access Token**: Short-lived (15 minutes) - use for API requests
+    3. **Refresh Token**: Long-lived (7 days) - use to get new access tokens
+    4. **Protected Endpoints**: Include `Authorization: Bearer <access_token>` header
+    
+    ### Example Usage:
+    
+    1. Register: `POST /auth/register` with email and password
+    2. Get tokens in response
+    3. Use access token: `Authorization: Bearer eyJ0eXAiOiJKV1Q...`
+    4. Refresh when needed: `POST /auth/refresh` with refresh token
     """,
     version="1.0.0",
     docs_url="/docs",
@@ -40,9 +54,12 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "Greetli AI Backend",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "features": ["JWT Authentication", "User Management", "OCR", "AI Integration", "Translation"]
     }
 
 # Include routers
+app.include_router(auth_routes.router)
 app.include_router(user_routes.router)
 app.include_router(chat_routes.router)
+app.include_router(documents_routes.router)
