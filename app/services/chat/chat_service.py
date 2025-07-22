@@ -13,11 +13,11 @@ class ChatService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.api_key = OPENAI_API_KEY
+        self.openai_api_key = OPENAI_API_KEY
         self.web_search_service = WebSearchService()
-        self.vector_db_service = QdrantSearchService()
+        self.qdrant_search_service = QdrantSearchService()
         self.prompt_generator = PromptGenerator()
-        self.llm_service = ChatModelService()
+        self.chat_model_service = ChatModelService()
         self.thread_service = ThreadService(db)
 
     def generate_prompt(self, context: str, query: str):
@@ -26,35 +26,34 @@ class ChatService:
         )
 
     def retrieve_query_chunks(self, query: str):
-        chunks = self.vector_db_service.search_similarity(query, k=3)
-        if not chunks:
+        relevant_chunks = self.qdrant_search_service.search_similarity(query, k=3)
+        if not relevant_chunks:
             # search web
             pass
-        return chunks
+        return relevant_chunks
 
-# Saves a chat message (user or assistant) to the DB
+    # Saves a chat message (user or assistant) to the DB
     async def save_message(self, thread: ChatThread, role: RoleEnum, content: str):
         message = ChatMessage(thread_id=thread.id, role=role, content=content)
         self.db.add(message)
         await self.db.flush()
 
     # Main handler: receives a user query, responds, and saves everything
-    async def handle_message(self, thread_id: str, query: str) -> dict:
-
+    async def handle_message(self, thread_id: str, user_query: str) -> dict:
         thread = await self.thread_service.get_or_create_thread(thread_id)
-        await self.save_message(thread, RoleEnum.USER, query)
+        await self.save_message(thread, RoleEnum.USER, user_query)
 
-        chunks = self.retrieve_query_chunks(query)
-        context = "\n".join(chunks)
+        relevant_chunks = self.retrieve_query_chunks(user_query)
+        context = "\n".join(relevant_chunks)
 
-        prompt = self.generate_prompt(context, query)
-        llm_result = self.llm_service.invoke(prompt)
+        prompt = self.generate_prompt(context, user_query)
+        llm_response = self.chat_model_service.invoke(prompt)
 
-        await self.save_message(thread, RoleEnum.ASSISTANT, llm_result.content)
+        await self.save_message(thread, RoleEnum.ASSISTANT, llm_response.content)
         return {
             "thread_id": thread.id,
-            "question": query,
-            "answer": llm_result.content,
+            "question": user_query,
+            "answer": llm_response.content,
         }
 
 
