@@ -8,7 +8,7 @@ from typing import Optional, Literal
 class ChatModelService:
     def __init__(
         self,
-        default_model: Literal["gpt-3.5", "gpt-4"] = "gpt-4",
+        default_model: Literal["gpt-3.5", "gpt-4"] = "gpt-4o",
         temperature: float = 0.2,
         streaming: bool = False,
     ):
@@ -19,7 +19,7 @@ class ChatModelService:
         # Load models
         self.models = {
             "gpt-3.5": ChatOpenAI(model="gpt-3.5-turbo", temperature=temperature, streaming=streaming),
-            "gpt-4": ChatOpenAI(model="gpt-4", temperature=temperature, streaming=streaming),
+            "gpt-4o": ChatOpenAI(model="gpt-4o", temperature=temperature, streaming=streaming),
             # Future: add Mistral, Claude, local, etc.
         }
 

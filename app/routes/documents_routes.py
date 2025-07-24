@@ -1,8 +1,13 @@
+import os
+import shutil
+from uuid import uuid4
+
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from typing import List
 
 from app.services.documents.document_service import DocumentService
+from controllers.document_controller import DocumentController
 
 router = APIRouter(
     prefix="/documents",
@@ -39,33 +44,15 @@ async def get_collection_info():
     info = service.get_collection_info()
     return info
 
-@router.post("/search")
-async def search_documents(
-    query: str,
-    k: int = 5
-):
-    """Search for similar documents."""
-    service = DocumentService()
-    results = service.search_documents(query, k)
-    
-    return {
-        "query": query,
-        "results": [
-            {
-                "content": doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content,
-                "metadata": doc.metadata
-            }
-            for doc in results
-        ]
-    }
+@router.post("/upload-pdf")
+async def upload_pdf(file: UploadFile = File(...)):
+    temp_filename = f"/tmp/{uuid4()}_{file.filename}"
+    with open(temp_filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
-@router.delete("/collection")
-async def delete_collection():
-    """Delete the entire document collection (use with caution!)."""
-    service = DocumentService()
-    success = await service.delete_collection()
-    
-    if success:
-        return {"message": "Collection deleted successfully"}
-    else:
-        raise HTTPException(status_code=500, detail="Failed to delete collection") 
+    controller = DocumentController()
+    result = await controller.upload_pdf(temp_filename)
+
+    os.remove(temp_filename)
+
+    return result
