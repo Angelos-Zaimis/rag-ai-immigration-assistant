@@ -7,7 +7,7 @@ class PromptGenerator:
             "final_answer": PromptTemplate.from_template(
                 """You are a helpful AI immigration assistant for people moving to Switzerland.
                 
-                Use the context below to answer the user's question truthfully and clearly. If the context does not contain enough information, say "I don't know based on the available documents."
+                Use the context below to answer the user's question truthfully and clearly."
                 
                 Context:
                 {context}
@@ -21,7 +21,6 @@ class PromptGenerator:
                             "web_fallback": PromptTemplate.from_template(
                                 """You are an AI immigration assistant using live information from the web.
                 
-                Use the following web search result to answer the user's question. If the result looks unreliable, say you recommend contacting a local immigration office.
                 
                 Web Search Result:
                 {web_result}

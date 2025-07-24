@@ -14,33 +14,7 @@ app = FastAPI(
     title="Greetli AI Backend",
     description="""
     Greetli AI Backend API with OCR, Langchain, Google Translate, and JWT Authentication capabilities.
-    
-    ## Features
-    * 🔐 JWT Authentication (Register, Login, Refresh)
-    * 👤 User Management
-    * 📝 OCR Processing
-    * 🤖 AI Integration
-    * 🌐 Translation Services
-    
-    ## Authentication
-    
-    This API uses JWT (JSON Web Tokens) for authentication:
-    
-    1. **Register** or **Login** to get access and refresh tokens
-    2. **Access Token**: Short-lived (15 minutes) - use for API requests
-    3. **Refresh Token**: Long-lived (7 days) - use to get new access tokens
-    4. **Protected Endpoints**: Include `Authorization: Bearer <access_token>` header
-    
-    ### Example Usage:
-    
-    1. Register: `POST /auth/register` with email and password
-    2. Get tokens in response
-    3. Use access token: `Authorization: Bearer eyJ0eXAiOiJKV1Q...`
-    4. Refresh when needed: `POST /auth/refresh` with refresh token
-    """,
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    """
 )
 
 # Add CORS middleware

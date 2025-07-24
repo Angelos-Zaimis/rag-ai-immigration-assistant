@@ -1,7 +1,3 @@
-"""
-Document service for uploading and processing documents to Qdrant vector database.
-"""
-
 from typing import List
 
 from langchain.schema import Document
@@ -22,18 +18,14 @@ class DocumentService:
         self.qdrant_search_service = QdrantSearchService()
 
     async def add_text_document(self, text: str, metadata: dict = None) -> bool:
-        """Add a text document to the vector database."""
         try:
-            # Create document
             document = Document(
                 page_content=text,
                 metadata=metadata or {}
             )
             
-            # Split into chunks
             text_chunks = self.text_splitter.split_documents([document])
             
-            # Add to vector store
             for chunk in text_chunks:
                 self.qdrant_search_service.vector_store.add_documents([chunk])
             
@@ -42,22 +34,17 @@ class DocumentService:
             print(f"Error adding text document: {e}")
             return False
 
-    async def add_pdf_file(self, file_path: str, metadata: dict = None) -> bool:
-        """Add a PDF file to the vector database."""
+    async def handle_upload_pdf_file(self, file_path: str, metadata: dict = None) -> bool:
         try:
-            # Load PDF
             pdf_loader = PyPDFLoader(file_path)
             pdf_documents = pdf_loader.load()
-            
-            # Add metadata to each document
+
             for document in pdf_documents:
                 document.metadata.update(metadata or {})
                 document.metadata['source_file'] = file_path
             
-            # Split into chunks
             pdf_chunks = self.text_splitter.split_documents(pdf_documents)
             
-            # Add to vector store
             self.qdrant_search_service.vector_store.add_documents(pdf_chunks)
             
             return True
@@ -66,15 +53,12 @@ class DocumentService:
             return False
 
     async def add_multiple_documents(self, documents: List[Document]) -> bool:
-        """Add multiple documents to the vector database."""
         try:
-            # Split all documents into chunks
             document_chunks = []
             for document in documents:
                 chunks = self.text_splitter.split_documents([document])
                 document_chunks.extend(chunks)
             
-            # Add all chunks to vector store
             self.qdrant_search_service.vector_store.add_documents(document_chunks)
             
             return True
@@ -83,11 +67,9 @@ class DocumentService:
             return False
 
     def search_documents(self, query: str, k: int = 5) -> List[Document]:
-        """Search for similar documents."""
         return self.qdrant_search_service.search_similarity(query, k)
 
     def get_collection_info(self) -> dict:
-        """Get information about the current collection."""
         try:
             qdrant_client = QdrantClient(host="localhost", port=6333)
             collection_info = qdrant_client.get_collection(self.qdrant_search_service.collection_name)

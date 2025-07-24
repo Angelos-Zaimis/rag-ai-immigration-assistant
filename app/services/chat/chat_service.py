@@ -26,7 +26,7 @@ class ChatService:
         )
 
     def retrieve_query_chunks(self, query: str):
-        relevant_chunks = self.qdrant_search_service.search_similarity(query, k=3)
+        relevant_chunks = self.qdrant_search_service.search_similarity(query, k=10)
         if not relevant_chunks:
             # search web
             pass
@@ -47,7 +47,7 @@ class ChatService:
         context = "\n".join(relevant_chunks)
 
         prompt = self.generate_prompt(context, user_query)
-        llm_response = self.chat_model_service.invoke(prompt)
+        llm_response = self.chat_model_service.invoke(prompt, "gpt-4o")
 
         await self.save_message(thread, RoleEnum.ASSISTANT, llm_response.content)
         return {
