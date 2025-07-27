@@ -7,6 +7,7 @@ from app.services.prompts.prompt_generator import PromptGenerator
 from app.services.search.qdrant_search_service import QdrantSearchService
 from app.services.search.web_search_service import WebSearchService
 from app.services.threads.thread_service import ThreadService
+from services.prompts.query_parser import QueryParser
 
 
 class ChatService:
@@ -19,6 +20,7 @@ class ChatService:
         self.prompt_generator = PromptGenerator()
         self.chat_model_service = ChatModelService()
         self.thread_service = ThreadService(db)
+        self.query_parser = QueryParser()
 
     def generate_prompt(self, context: str, query: str):
         return self.prompt_generator.generate(
@@ -43,20 +45,20 @@ class ChatService:
         thread = await self.thread_service.get_or_create_thread(thread_id)
         await self.save_message(thread, RoleEnum.USER, user_query)
 
-        relevant_chunks = self.retrieve_query_chunks(user_query)
-        context = "\n".join(relevant_chunks)
+        # Step 1: Optimize query for semantic retrieval
+        optimized_user_query = await self.query_parser.optimize(user_query)
 
-        prompt = self.generate_prompt(context, user_query)
-        llm_response = self.chat_model_service.invoke(prompt, "gpt-4o")
+        # Step 2: Retrieve relevant knowledge chunks
+        relevant_chunks = self.retrieve_query_chunks(optimized_user_query)
 
+        # Step 3: Build prompt with retrieved context and original query
+        prompt = self.generate_prompt(relevant_chunks, user_query)
+
+        # Step 4: Get LLM response
+        llm_response = await self.chat_model_service.invoke(prompt, "gpt-4o")
+
+        # Step 5: Save assistant reply
         await self.save_message(thread, RoleEnum.ASSISTANT, llm_response.content)
-        return {
-            "thread_id": thread.id,
-            "question": user_query,
-            "answer": llm_response.content,
-        }
 
-
-
-
+        return {"reply": llm_response.content}
 
