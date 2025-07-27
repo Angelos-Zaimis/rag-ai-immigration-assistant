@@ -38,11 +38,10 @@ async def upload_text_document(
         raise HTTPException(status_code=500, detail="Failed to upload document")
 
 @router.get("/collection-info")
-async def get_collection_info():
-    """Get information about the document collection."""
-    service = DocumentService()
-    info = service.get_collection_info()
-    return info
+def get_collection_info():
+    controller = DocumentController()
+
+    return controller.retrieve_collection_info()
 
 @router.post("/upload-pdf")
 async def upload_pdf(file: UploadFile = File(...)):

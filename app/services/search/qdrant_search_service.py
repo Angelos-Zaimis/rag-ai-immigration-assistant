@@ -1,6 +1,6 @@
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai.embeddings import OpenAIEmbeddings
 from qdrant_client import QdrantClient
-from langchain_community.vectorstores import Qdrant
+from langchain_qdrant import QdrantVectorStore
 
 class QdrantSearchService:
     # Initializes the Qdrant client, OpenAI embeddings, and vector store
@@ -8,10 +8,10 @@ class QdrantSearchService:
         self.collection_name = collection_name
         self.client = QdrantClient(host="localhost", port=6333)
         self.embeddings = OpenAIEmbeddings()
-        self.vector_store = Qdrant(
+        self.vector_store = QdrantVectorStore(
             client=self.client,
             collection_name=self.collection_name,
-            embeddings=self.embeddings,
+            embedding=self.embeddings,
         )
 
     # Searches for the top-k most similar document chunks based on the input query

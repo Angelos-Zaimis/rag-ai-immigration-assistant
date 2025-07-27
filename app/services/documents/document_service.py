@@ -4,6 +4,7 @@ from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from qdrant_client import QdrantClient
+from qdrant_client.grpc import CollectionInfo
 
 from app.services.search.qdrant_search_service import QdrantSearchService
 
@@ -11,8 +12,8 @@ from app.services.search.qdrant_search_service import QdrantSearchService
 class DocumentService:
     def __init__(self):
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
+            chunk_size=500,
+            chunk_overlap=50,
             length_function=len,
         )
         self.qdrant_search_service = QdrantSearchService()
@@ -73,12 +74,30 @@ class DocumentService:
         try:
             qdrant_client = QdrantClient(host="localhost", port=6333)
             collection_info = qdrant_client.get_collection(self.qdrant_search_service.collection_name)
-            
+
+            # Fetch first 10 points (you can paginate if needed)
+            points, _ = qdrant_client.scroll(
+                collection_name=self.qdrant_search_service.collection_name,
+                limit=100,
+                with_payload=True,
+                with_vectors=False  # change to True if you want vector values
+            )
+
+            decoded_points = []
+            for point in points:
+                decoded_points.append({
+                    "id": point.id,
+                    "payload": point.payload,
+                    "vector": point.vector if point.vector else None
+                })
+
             return {
                 "collection_name": self.qdrant_search_service.collection_name,
                 "points_count": collection_info.points_count,
-                "status": collection_info.status
+                "status": collection_info.status,
+                "sample_points": decoded_points
             }
+
         except Exception as e:
             return {"error": str(e)}
 
