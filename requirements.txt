@@ -25,6 +25,9 @@ langgraph==0.5.3                  # LangGraph orchestration
 openai===1.90.0                  # OpenAI Python SDK
 langchain-openai==0.3.28
 langchain_qdrant==0.2.0
+sentence_transformers==5.0.0
+faiss-cpu==1.11.0.post1
+
 # --- Qdrant Vector Store ---
 qdrant-client==1.15.0             # Qdrant vector DB client
 
