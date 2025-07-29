@@ -3,7 +3,7 @@ version: "3.9"
 services:
   web:
     build: .
-    container_name: greetli_backend
+    container_name: rag_backend
     ports:
       - "8000:8000"
     volumes:
@@ -15,11 +15,11 @@ services:
 
   db:
     image: postgres:16
-    container_name: greetli_db
+    container_name: db
     environment:
-      - POSTGRES_USER=greetli_ai
-      - POSTGRES_PASSWORD=greetli_ai
-      - POSTGRES_DB=greetli_ai_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=db
     ports:
       - "5432:5432"
     volumes:
