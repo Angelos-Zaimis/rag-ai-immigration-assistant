@@ -6,7 +6,6 @@ from services.search.reranker import Reranker
 
 
 class QdrantSearchService:
-    # Initializes the Qdrant client, OpenAI embeddings, and vector store
     def __init__(self, collection_name: str = "immigration_docs"):
         self.collection_name = collection_name
         self.client = QdrantClient(host="localhost", port=6333)
@@ -25,8 +24,7 @@ class QdrantSearchService:
             if not results:
                 return []
             reranked_results = self.reranker.rerank(query, results, 5)
-
-            return [doc.page_content for doc in reranked_results]
+            return reranked_results
         except Exception as e:
             print(f"Similarity search failed: {e}")
             return []

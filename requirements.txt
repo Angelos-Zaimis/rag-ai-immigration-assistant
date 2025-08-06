@@ -5,6 +5,9 @@ python-dotenv==1.0.1              # Load env vars from .env
 fastapi-utilities==0.3.1          # Fast api utilities
 APScheduler==3.11.0
 pypdf==5.8.0
+citeproc-py==0.8.2
+context_cite==0.0.4
+
 # --- Authentication ---
 python-jose[cryptography]==3.4.0  # JWT tokens
 passlib[bcrypt]==1.7.4             # Password hashing

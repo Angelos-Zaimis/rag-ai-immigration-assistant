@@ -8,15 +8,16 @@ class ChatModelService:
     def __init__(
         self,
         default_model: Literal["gpt-3.5", "gpt-4"] = "gpt-4o",
-        temperature: float = 0.2,
+        temperature: float = 0.5,
         streaming: bool = True,
+
     ):
         self.temperature = temperature
         self.streaming = streaming
 
         self.models = {
-            "gpt-3.5": ChatOpenAI(model="gpt-3.5-turbo", temperature=temperature, streaming=streaming),
-            "gpt-4o": ChatOpenAI(model="gpt-4o", temperature=temperature, streaming=streaming),
+            "gpt-3.5": ChatOpenAI(model="gpt-3.5-turbo", temperature=temperature, streaming=streaming, top_p=0.9),
+            "gpt-4o": ChatOpenAI(model="gpt-4o", temperature=temperature, streaming=streaming, top_p=0.9),
         }
 
         self.default_model = default_model

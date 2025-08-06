@@ -7,6 +7,7 @@ from app.services.prompts.prompt_generator import PromptGenerator
 from app.services.search.qdrant_search_service import QdrantSearchService
 from app.services.search.web_search_service import WebSearchService
 from app.services.threads.thread_service import ThreadService
+from services.prompts.citation_service import CitationService
 from services.prompts.query_parser import QueryParser
 
 
@@ -21,6 +22,7 @@ class ChatService:
         self.chat_model_service = ChatModelService()
         self.thread_service = ThreadService(db)
         self.query_parser = QueryParser()
+        self.citation_service = CitationService()
 
     def generate_prompt(self, context: str, query: str):
         return self.prompt_generator.generate(
@@ -51,14 +53,23 @@ class ChatService:
         # Step 2: Retrieve relevant knowledge chunks
         relevant_chunks = self.retrieve_query_chunks(optimized_user_query)
 
-        # Step 3: Build prompt with retrieved context and original query
-        prompt = self.generate_prompt(relevant_chunks, user_query)
+        # Step 3: Assign citation IDs and build citation map + context string
+        context_str, citation_map = self.citation_service.generate_citation_map(relevant_chunks)
 
-        # Step 4: Get LLM response
+        # Step 4: Build prompt with retrieved context and original query
+        prompt = self.generate_prompt(context_str, user_query)
+
+        # Step 5: Get LLM response
         llm_response = await self.chat_model_service.invoke(prompt, "gpt-4o")
 
-        # Step 5: Save assistant reply
-        await self.save_message(thread, RoleEnum.ASSISTANT, llm_response.content)
+        # Step 6: Post-process the LLM response with citations
+        final_answer, bibliography = self.citation_service.replace_markers(llm_response.content, citation_map)
 
-        return {"reply": llm_response.content}
+        # Step 7: Save assistant reply
+        await self.save_message(thread, RoleEnum.ASSISTANT, final_answer)
 
+        # Step 8: Return full response
+        return {
+            "reply": final_answer,
+            "bibliography": bibliography
+        }
