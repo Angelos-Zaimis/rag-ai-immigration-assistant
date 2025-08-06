@@ -23,8 +23,3 @@ class Reranker:
         # Final top-k results
         top_results = [hit[0] for hit in scored_hits[:top_k]]
         return top_results
-
-
-
-
-
