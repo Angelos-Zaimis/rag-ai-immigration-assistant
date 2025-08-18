@@ -1,1 +1,1 @@
-A RAG-based AI immigration assistant using LangChain, OpenAI, and Quadrant Vector DB to retrieve and generate the most relevant information tailored to each user's needs.
+🤖 RAG-powered AI Immigration Assistant - Agentic AI system built with LangGraph, LangChain, OpenAI, and Qdrant for intelligent document processing, vector search, and conversational AI chat
